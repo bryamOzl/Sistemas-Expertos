@@ -1,0 +1,49 @@
+CALL gds.graph.create(
+    'Empleados',
+    {
+        Datos: {
+            label: 'Datos',
+            properties: 'nivel_de_satisfacción'
+        }
+    },
+    '*'
+);
+
+
+CALL gds.beta.knn.stream('Empleados', {
+    topK: 1,
+    nodeWeightProperty: 'nivel_de_satisfacción',
+    // The following parameters are set to produce a deterministic result
+    randomSeed: 42,
+    concurrency: 1,
+    sampleRate: 1.0,
+    deltaThreshold: 0.0
+})
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).empleado AS Empleado1, gds.util.asNode(node2).empleado AS Empleado2, similarity
+ORDER BY similarity DESCENDING, Empleado1, Empleado2
+
+
+CALL gds.graph.create(
+    'Evaluacion',
+    {
+        Datos: {
+            label: 'Datos',
+            properties: 'ultima_evaluacion'
+        }
+    },
+    '*'
+);
+
+CALL gds.beta.knn.stream('Empleados', {
+    topK: 1,
+    nodeWeightProperty: 'ultima_evaluacion',
+    // The following parameters are set to produce a deterministic result
+    randomSeed: 42,
+    concurrency: 1,
+    sampleRate: 1.0,
+    deltaThreshold: 0.0
+})
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).empleado AS Empleado1, gds.util.asNode(node2).empleado AS Empleado2, similarity
+ORDER BY similarity DESCENDING, Empleado1, Empleado2
